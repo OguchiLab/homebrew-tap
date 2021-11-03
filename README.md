@@ -5,7 +5,10 @@
 ## インストールする前に
 
 通常バージョンのrabbitmqをアンインストール
+
 `brew uninstall rabbitmq`
+
+その際に、設定ファイルが残る可能性があるので、 /PREFIX/etc/rabbitmq/ 以下のファイルはそのまま残すかバックアップしておく。
 
 ## How do I install these formulae?
 
