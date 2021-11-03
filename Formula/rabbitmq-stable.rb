@@ -5,6 +5,7 @@ class RabbitmqStable < Formula
   sha256 "943a8e1399cf7d9f30306be5d51acf60964c4308b3ed118e1f82b7fca9970ba7"
   license "MPL-2.0"
 
+
   livecheck do
     url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
@@ -12,6 +13,8 @@ class RabbitmqStable < Formula
 
   depends_on "python@3.9" => :build
   depends_on "erlang"
+
+  uses_from_macos "unzip" => :build
 
   def install
     # Install the base files
@@ -41,13 +44,18 @@ class RabbitmqStable < Formula
     # Enable plugins - management web UI; STOMP, MQTT, AMQP 1.0 protocols
     enabled_plugins_path = etc/"rabbitmq/enabled_plugins"
     unless enabled_plugins_path.exist?
-      enabled_plugins_path.write "[rabbitmq_management,rabbitmq_stomp,rabbitmq_amqp1_0," \
-                                 "rabbitmq_mqtt,rabbitmq_stream]."
+      enabled_plugins_path.write "[rabbitmq_management,rabbitmq_stomp,rabbitmq_amqp1_0,rabbitmq_mqtt]."
     end
 
-#    sbin.install prefix/"plugins/rabbitmq_management-#{version}/priv/www/cli/rabbitmqadmin"
-#    (sbin/"rabbitmqadmin").chmod 0755
-#    (bash_completion/"rabbitmqadmin.bash").write Utils.safe_popen_read("#{sbin}/rabbitmqadmin", "--bash-completion")
+    # Extract rabbitmqadmin and install to sbin
+    # use it to generate, then install the bash completion file
+    system "unzip", "-qq", "-j",
+           "#{prefix}/plugins/rabbitmq_management-#{version}.ez",
+           "rabbitmq_management-#{version}/priv/www/cli/rabbitmqadmin"
+
+    sbin.install "rabbitmqadmin"
+    (sbin/"rabbitmqadmin").chmod 0755
+    (bash_completion/"rabbitmqadmin.bash").write Utils.safe_popen_read("#{sbin}/rabbitmqadmin", "--bash-completion")
   end
 
   def caveats
